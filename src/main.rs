@@ -111,34 +111,34 @@ async fn assume_role(profile: &Profile) -> anyhow::Result<(Region, AwsCredential
     Ok((region, creds))
 }
 
-struct Parameter<'a> {
-    var_name: &'a str,
+struct Variable<'a> {
+    name: &'a str,
     value: Option<&'a str>,
 }
 
 fn handle_credentials(profile: &str, region: Region, creds: AwsCredentials) -> anyhow::Result<()> {
-    fn param<'a>(var_name: &'a str, value: Option<&'a str>) -> Parameter<'a> {
-        Parameter { var_name, value }
+    fn v<'a>(name: &'a str, value: Option<&'a str>) -> Variable<'a> {
+        Variable { name, value }
     }
 
     let token = creds.token();
-    let params = [
+    let variables = [
         // for AWS SDK, aws-cli
-        param("AWS_PROFILE", None),
-        param("AWS_REGION", Some(region.name())),
-        param("AWS_DEFAULT_REGION", Some(region.name())),
-        param("AWS_ACCESS_KEY_ID", Some(creds.aws_access_key_id())),
-        param("AWS_SECRET_ACCESS_KEY", Some(creds.aws_secret_access_key())),
-        param("AWS_SESSION_TOKEN", token.as_ref().map(|s| s.as_str())),
+        v("AWS_PROFILE", None),
+        v("AWS_REGION", Some(region.name())),
+        v("AWS_DEFAULT_REGION", Some(region.name())),
+        v("AWS_ACCESS_KEY_ID", Some(creds.aws_access_key_id())),
+        v("AWS_SECRET_ACCESS_KEY", Some(creds.aws_secret_access_key())),
+        v("AWS_SESSION_TOKEN", token.as_ref().map(|s| s.as_str())),
         // for prompts
-        param("ASSUME_ROLERS_PROFILE", Some(profile)),
+        v("ASSUME_ROLERS_PROFILE", Some(profile)),
     ];
 
-    for Parameter { var_name, value } in params {
+    for Variable { name, value } in variables {
         if let Some(value) = value {
-            env::set_var(var_name, value);
+            env::set_var(name, value);
         } else {
-            env::remove_var(var_name);
+            env::remove_var(name);
         }
     }
 
