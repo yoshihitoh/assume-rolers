@@ -36,7 +36,10 @@ async fn load_profiles() -> anyhow::Result<ProfileSet> {
 }
 
 async fn select_profile(profiles: &ProfileSet) -> anyhow::Result<Option<String>> {
-    let mut names = profiles.profiles().collect::<Vec<_>>();
+    let mut names = profiles
+        .profiles()
+        .filter(|&p| profiles.get_profile(p).unwrap().get("role_arn").is_some())
+        .collect::<Vec<_>>();
     names.sort();
     let item_reader = SkimItemReader::default();
     let items = item_reader.of_bufread(Cursor::new(names.join("\n")));
