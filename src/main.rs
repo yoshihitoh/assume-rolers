@@ -11,17 +11,29 @@ use rusoto_core::credential::AwsCredentials;
 use rusoto_core::Region;
 use rusoto_sts::{StsAssumeRoleSessionCredentialsProvider, StsClient};
 use skim::prelude::*;
-use tracing::info;
+use tracing::{debug, error};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
+    match run().await {
+        Ok(_) => Ok(()), // never
+        Err(e) => {
+            error!("error:{:?}", e);
+            Err(e)
+        }
+    }
+}
+
+async fn run() -> anyhow::Result<()> {
     let profiles = load_profiles().await?;
 
     if let Some(profile_name) = select_profile(&profiles).await? {
         let (region, creds) = assume_role(profiles.get_profile(&profile_name).unwrap()).await?;
         handle_credentials(&profile_name, region, creds)?;
+    } else {
+        debug!("no profile selected.")
     }
 
     Ok(())
@@ -32,6 +44,11 @@ async fn load_profiles() -> anyhow::Result<ProfileSet> {
     let fs = Fs::default();
     let env = Env::default();
     let profiles = load(&fs, &env, &profile_files).await?;
+
+    debug!(
+        "profile names: [{}]",
+        profiles.profiles().collect::<Vec<_>>().join(", ")
+    );
     Ok(profiles)
 }
 
@@ -46,13 +63,15 @@ async fn select_profile(profiles: &ProfileSet) -> anyhow::Result<Option<String>>
 
     let options = SkimOptionsBuilder::default().reverse(true).build()?;
     let selected = Skim::run_with(&options, Some(items))
-        .map(|out| out.selected_items)
+        .and_then(|out| (!out.is_abort).then(move || out.selected_items))
         .unwrap_or_else(Vec::default);
 
     Ok(selected.into_iter().next().map(|x| x.output().to_string()))
 }
 
 async fn assume_role(profile: &Profile) -> anyhow::Result<(Region, AwsCredentials)> {
+    debug!("target profile:{}", profile.name());
+
     let source_profile = profile.get("source_profile").unwrap_or("default");
     env::set_var("AWS_PROFILE", source_profile);
 
@@ -143,7 +162,7 @@ fn handle_credentials(profile: &str, region: Region, creds: AwsCredentials) -> a
     }
 
     let shell = env::var("SHELL")?;
-    info!("shell: {}, ", &shell);
+    debug!("shell: {}, ", &shell);
 
     let shell = CString::new(shell.bytes().collect::<Vec<_>>())?;
     let args: Vec<CString> = Vec::new();
