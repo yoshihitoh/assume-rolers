@@ -43,7 +43,7 @@ async fn credentials_provider_for(
     let scope_down_policy = profile.scope_down_policy().map(|s| s.to_string());
     let mfa_serial = profile.mfa_serial().map(|s| s.to_string());
 
-    let sts_client = StsClient::new(region.clone());
+    let sts_client = StsClient::new(region);
     Ok(StsAssumeRoleSessionCredentialsProvider::new(
         sts_client,
         role_arn,
@@ -81,8 +81,8 @@ impl AssumeRole for RusotoAssumeRole {
             credentials: Credentials {
                 key: credentials.aws_access_key_id().to_string(),
                 secret: credentials.aws_secret_access_key().to_string(),
-                token: credentials.token().clone().map(|s| s.to_string()),
-                expires_at: credentials.expires_at().clone(),
+                token: credentials.token().clone(),
+                expires_at: *credentials.expires_at(),
             },
             region_name: region.name().to_string(),
         })

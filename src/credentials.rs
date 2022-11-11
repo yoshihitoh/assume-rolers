@@ -17,7 +17,7 @@ impl Credentials {
     }
 
     pub fn token(&self) -> Option<&str> {
-        self.token.as_ref().map(|s| s.as_str())
+        self.token.as_deref()
     }
 
     pub fn expires_at(&self) -> Option<DateTime<Utc>> {

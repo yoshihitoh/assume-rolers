@@ -16,37 +16,33 @@ pub struct Profile {
     pub mfa_serial: Option<String>,
 }
 
-fn maybe_str_ref<R: AsRef<str>>(x: Option<&R>) -> Option<&str> {
-    x.map(|s| s.as_ref())
-}
-
 impl Profile {
     pub fn has_role_arn(&self) -> bool {
         self.role_arn.is_some()
     }
 
     pub fn name(&self) -> &str {
-        &self.name.as_str()
+        &self.name
     }
 
     pub fn source_profile_name(&self) -> Option<&str> {
-        maybe_str_ref(self.source_profile_name.as_ref())
+        self.source_profile_name.as_deref()
     }
 
     pub fn region_name(&self) -> Option<&str> {
-        maybe_str_ref(self.region_name.as_ref())
+        self.region_name.as_deref()
     }
 
     pub fn role_arn(&self) -> Option<&str> {
-        maybe_str_ref(self.role_arn.as_ref())
+        self.role_arn.as_deref()
     }
 
     pub fn role_session_name(&self) -> Option<&str> {
-        maybe_str_ref(self.role_session_name.as_ref())
+        self.role_session_name.as_deref()
     }
 
     pub fn external_id(&self) -> Option<&str> {
-        maybe_str_ref(self.external_id.as_ref())
+        self.external_id.as_deref()
     }
 
     pub fn duration_seconds(&self) -> Option<u32> {
@@ -54,11 +50,11 @@ impl Profile {
     }
 
     pub fn scope_down_policy(&self) -> Option<&str> {
-        maybe_str_ref(self.scope_down_policy.as_ref())
+        self.scope_down_policy.as_deref()
     }
 
     pub fn mfa_serial(&self) -> Option<&str> {
-        maybe_str_ref(self.mfa_serial.as_ref())
+        self.mfa_serial.as_deref()
     }
 }
 

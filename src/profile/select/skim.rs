@@ -22,8 +22,8 @@ impl SelectProfile for SkimProfileSelector {
 
         let options = SkimOptionsBuilder::default().reverse(true).build()?;
         let selected = Skim::run_with(&options, Some(items))
-            .and_then(|out| (!out.is_abort).then(move || out.selected_items))
-            .unwrap_or_else(Vec::default);
+            .and_then(|out| (!out.is_abort).then_some(out.selected_items))
+            .unwrap_or_default();
 
         let selected_name = selected.into_iter().next().map(|x| x.output().to_string());
         Ok(selected_name.and_then(|name| profiles.get_profile(&name)))
