@@ -2,6 +2,14 @@
 name = "assume-rolers"
 version = "0.1.0"
 edition = "2021"
+authors = ["yoshihitoh <yoshihito.arih@gmail.com>"]
+categories = ["command-line-utilities"]
+keywords = ["aws", "assume_role"]
+description = "A command line tool to use a temporary AWS credentials."
+homepage = "https://github.com/yoshihitoh/assume-rolers"
+repository = "https://github.com/yoshihitoh/assume-rolers"
+readme = "README.md"
+license = "MIT"
 
 [[bin]]
 name = "assume-rolers"
