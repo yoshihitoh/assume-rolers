@@ -35,10 +35,12 @@ async fn credentials_provider_for(
 
     let external_id = profile.external_id().map(|s| s.to_string());
 
+    // According to the Rusoto's documentation, the default value for `session_duration` is 1 hour,
+    // but the actual value is just 15 minutes. So assume-rolers will assume 1 hour for convenience.
     let session_duration = if let Some(d) = profile.duration_seconds {
         Some(Duration::seconds(i64::try_from(d)?))
     } else {
-        None
+        Some(Duration::hours(1))
     };
     let scope_down_policy = profile.scope_down_policy().map(|s| s.to_string());
     let mfa_serial = profile.mfa_serial().map(|s| s.to_string());
