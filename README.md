@@ -44,6 +44,23 @@ If the role you selected requires MFA, you can set a token code via `-t` or `--t
 $ assume-rolers <PROFILE_NAME> [-t <TOKEN>]
 ```
 
+### Deactivate the session
+assume-rolers creates a new shell session, so you can deactivate it by `exit` command.
+
+## Outputs
+assume-rolers will export the following parameters.
+
+| name                   | op    | comment
+|:-----------------------|:------|:-------
+| AWS_PROFILE            | unset | \-
+| AWS_REGION             | set   | \-
+| AWS_DEFAULT_REGION     | set   | \-
+| AWS_ACCESS_KEY_ID      | set   | \-
+| AWS_SECRET_ACCESS_KEY  | set   | \-
+| AWS_SESSION_TOKEN      | set   | \-
+| AWS_SESSION_EXPIRATION | set   | expiration datetime in RFC 3339 format. e.g. "2022-11-20T12:01:36+00:00"
+| ASSUME_ROLERS_PROFILE  | set   | assumed profile name. you can use this variable for the shell prompt.
+
 ## Credentials
 assume-rolers depends on rusoto's [DefaultCredentialsProvider](https://rusoto.github.io/rusoto/rusoto_core/struct.DefaultCredentialsProvider.html) backed by [ChainProvider](https://rusoto.github.io/rusoto/rusoto_credential/struct.ChainProvider.html). So assume-rolers will look credentials in this order.
 
