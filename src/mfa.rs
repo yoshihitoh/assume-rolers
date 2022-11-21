@@ -28,7 +28,7 @@ pub struct StaticMfaTokenReader {
 
 impl<S: Into<String>> From<S> for StaticMfaTokenReader {
     fn from(s: S) -> Self {
-        StaticMfaTokenReader { token: s.into()}
+        StaticMfaTokenReader { token: s.into() }
     }
 }
 

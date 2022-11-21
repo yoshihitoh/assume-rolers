@@ -42,6 +42,7 @@ dependencies = [
  "aws-types",
  "chrono",
  "clap 4.0.22",
+ "clap_complete",
  "nix 0.25.0",
  "rusoto_config",
  "rusoto_core",
@@ -447,6 +448,15 @@ dependencies = [
  "once_cell",
  "strsim",
  "termcolor",
+]
+
+[[package]]
+name = "clap_complete"
+version = "4.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96b0fba905b035a30d25c1b585bf1171690712fbb0ad3ac47214963aa4acc36c"
+dependencies = [
+ "clap 4.0.22",
 ]
 
 [[package]]

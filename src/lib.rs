@@ -1,3 +1,4 @@
+pub mod app;
 pub mod assume_role;
 pub mod credentials;
 pub mod handler;

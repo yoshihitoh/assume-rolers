@@ -21,7 +21,8 @@ async-trait = "0.1"
 aws-config = "0.51"
 aws-types = "0.51"
 chrono = "0.4"
-clap = { version = "4.0", features = ["derive"] }
+clap = { version = "4.0", features = ["derive", "string"] }
+clap_complete = "4.0"
 nix = "0.25"
 rusoto_config = "0.48"
 rusoto_core = "0.48"

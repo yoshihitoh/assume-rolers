@@ -10,9 +10,9 @@ pub struct StaticProfileSelector {
     profile_name: String,
 }
 
-impl From<String>  for StaticProfileSelector {
+impl From<String> for StaticProfileSelector {
     fn from(profile_name: String) -> Self {
-        StaticProfileSelector {profile_name}
+        StaticProfileSelector { profile_name }
     }
 }
 
