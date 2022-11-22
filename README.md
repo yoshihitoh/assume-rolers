@@ -70,3 +70,11 @@ assume-rolers depends on rusoto's [DefaultCredentialsProvider](https://rusoto.gi
 > 4. IAM instance profile. Will only work if running on an EC2 instance with an instance profile/role.
 
 quoted from Rusoto's document.
+
+## Shell completion
+Currently, assume-rolers supports fish shell only.
+
+try the following command to enable shell completion.
+```bash
+$ cp ./shell-completions/assume-rolers.fish ~/.config/fish/functions/
+```
