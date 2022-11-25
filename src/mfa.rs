@@ -13,7 +13,7 @@ pub struct StdinMfaTokenReader;
 #[async_trait]
 impl ReadMfaToken for StdinMfaTokenReader {
     async fn read_mfa_token(&self, mfa_serial: &str) -> anyhow::Result<String> {
-        print!("Enter MFA code for {}: ", mfa_serial);
+        eprint!("Enter MFA code for {}: ", mfa_serial);
         io::stdout().flush()?;
 
         let mut code = String::new();
