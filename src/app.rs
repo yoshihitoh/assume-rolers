@@ -125,6 +125,8 @@ pub async fn app() -> anyhow::Result<clap::Command> {
         )
         .arg(
             clap::Arg::new("token")
+                .short('t')
+                .long("token")
                 .value_hint(clap::ValueHint::Other)
                 .help("Specify a token code provided by the MFA device."),
         )
