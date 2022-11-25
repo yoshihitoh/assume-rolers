@@ -1,11 +1,16 @@
+use std::collections::HashMap;
 use std::ffi::OsStr;
+use std::path::Path;
 
+use assume_rolers_schema::credentials::ProfileCredentials;
 use async_trait::async_trait;
 use clap::builder::{PossibleValue, TypedValueParser};
 use clap::ArgAction;
 
 use crate::assume_role::rusoto::RusotoAssumeRole;
 use crate::handler::shell::ShellCredentialsHandler;
+use crate::handler::wasm::WasmCredentialsHandler;
+use crate::handler::HandleCredentials;
 use crate::mfa::{ReadMfaToken, StaticMfaTokenReader, StdinMfaTokenReader};
 use crate::profile::load::aws_sdk::AwsSdkProfileLoader;
 use crate::profile::load::LoadProfiles;
@@ -111,6 +116,48 @@ fn mfa_reader_from(assume_role: &AssumeRole) -> MfaReader {
     }
 }
 
+enum CredentialsHandler {
+    Shell(ShellCredentialsHandler),
+    WasmPlugin(WasmCredentialsHandler),
+}
+
+impl HandleCredentials for CredentialsHandler {
+    fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+        use CredentialsHandler::*;
+        match self {
+            Shell(handler) => handler.handle_credentials(credentials),
+            WasmPlugin(handler) => handler.handle_credentials(credentials),
+        }
+    }
+}
+
+fn credentials_handler_from(assume_role: &AssumeRole) -> anyhow::Result<CredentialsHandler> {
+    if let Some(plugin) = assume_role.plugin.as_ref() {
+        let mut builtin_plugins: HashMap<&'static str, Vec<u8>> = vec![(
+            "export",
+            include_bytes!("../plugins/assume-rolers-export.wasm").to_vec(),
+        )]
+        .into_iter()
+        .collect();
+        let file_ext = Path::new(plugin).extension().and_then(|s| s.to_str());
+        if let Some("wasm") = file_ext {
+            Ok(CredentialsHandler::WasmPlugin(
+                WasmCredentialsHandler::from_file(plugin),
+            ))
+        } else if let Some(binary) = builtin_plugins.remove(plugin.as_str()) {
+            Ok(CredentialsHandler::WasmPlugin(
+                WasmCredentialsHandler::from_binary(plugin, binary),
+            ))
+        } else {
+            Err(anyhow::anyhow!(
+                "plugin must be a path to .wasm file, or built-in plugin name."
+            ))
+        }
+    } else {
+        Ok(CredentialsHandler::Shell(ShellCredentialsHandler))
+    }
+}
+
 pub async fn app() -> anyhow::Result<clap::Command> {
     let profile_names = profile_names(AwsSdkProfileLoader::default()).await?;
     let name_parser = ProfileNameParser::from(profile_names);
@@ -131,6 +178,13 @@ pub async fn app() -> anyhow::Result<clap::Command> {
                 .help("Specify a token code provided by the MFA device."),
         )
         .arg(
+            clap::Arg::new("plugin")
+                .short('p')
+                .long("plugin")
+                .value_hint(clap::ValueHint::FilePath)
+                .help("Specify a builtin plugin name, or path to the WebAssembly/WASI file."),
+        )
+        .arg(
             clap::Arg::new("list")
                 .short('l')
                 .long("list")
@@ -144,6 +198,7 @@ pub async fn app() -> anyhow::Result<clap::Command> {
 pub struct AssumeRole {
     profile: Option<String>,
     token: Option<String>,
+    plugin: Option<String>,
 }
 
 #[derive(Debug)]
@@ -163,7 +218,12 @@ impl From<clap::Command> for App {
         } else {
             let profile = matches.get_one::<String>("profile").map(|s| s.to_string());
             let token = matches.get_one::<String>("token").map(|s| s.to_string());
-            App::AssumeRole(AssumeRole { profile, token })
+            let plugin = matches.get_one::<String>("plugin").map(|s| s.to_string());
+            App::AssumeRole(AssumeRole {
+                profile,
+                token,
+                plugin,
+            })
         }
     }
 }
@@ -179,12 +239,13 @@ impl App {
     async fn assume_role(assume_role: AssumeRole) -> anyhow::Result<()> {
         let selector = selector_from(&assume_role);
         let mfa_reader = mfa_reader_from(&assume_role);
+        let handler = credentials_handler_from(&assume_role)?;
         let assume_rolers = AssumeRolers::new(
             AwsSdkProfileLoader::default(),
             selector,
             mfa_reader,
             RusotoAssumeRole,
-            ShellCredentialsHandler,
+            handler,
         );
         assume_rolers.run().await?;
         Ok(())

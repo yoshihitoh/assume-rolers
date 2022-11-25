@@ -1,5 +1,7 @@
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Credentials {
     pub key: String,
     pub secret: String,
@@ -23,4 +25,11 @@ impl Credentials {
     pub fn expires_at(&self) -> Option<DateTime<Utc>> {
         self.expires_at
     }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ProfileCredentials {
+    pub profile_name: String,
+    pub region_name: String,
+    pub credentials: Credentials,
 }

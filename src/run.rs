@@ -1,8 +1,9 @@
 use crate::assume_role::AssumeRole;
-use crate::handler::{HandleCredentials, HandleCredentialsRequest};
+use crate::handler::HandleCredentials;
 use crate::mfa::ReadMfaToken;
 use crate::profile::load::LoadProfiles;
 use crate::profile::select::SelectProfile;
+use assume_rolers_schema::credentials::ProfileCredentials;
 use tracing::debug;
 
 pub struct AssumeRolers<L, S, R, A, H> {
@@ -40,10 +41,10 @@ where
                 .assume_role(profile, self.mfa_reader)
                 .await?;
 
-            self.handler.handle_credentials(HandleCredentialsRequest {
-                profile_name: profile.name(),
-                region_name: &result.region_name,
-                credentials: &result.credentials,
+            self.handler.handle_credentials(ProfileCredentials {
+                profile_name: profile.name().to_string(),
+                region_name: result.region_name,
+                credentials: result.credentials,
             })?;
         } else {
             debug!("no profile selected.")

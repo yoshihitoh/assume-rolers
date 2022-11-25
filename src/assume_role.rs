@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 
-use crate::credentials::Credentials;
 use crate::mfa::ReadMfaToken;
 use crate::profile::Profile;
+use assume_rolers_schema::credentials::Credentials;
 
 pub mod rusoto;
 

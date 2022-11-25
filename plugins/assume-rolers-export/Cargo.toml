@@ -1,0 +1,9 @@
+[package]
+name = "assume-rolers-export"
+version = "0.3.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+assume-rolers-schema = { path = "../../assume-rolers-schema" }
+serde_json = "1.0"

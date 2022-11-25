@@ -1,21 +1,24 @@
 use std::env;
 use std::ffi::CString;
+
 use tracing::debug;
 
-use crate::handler::{into_variables, HandleCredentials, HandleCredentialsRequest, Variable};
+use assume_rolers_schema::credentials::ProfileCredentials;
+
+use crate::handler::{into_variables, HandleCredentials, Variable};
 
 pub struct ShellCredentialsHandler;
 
 impl HandleCredentials for ShellCredentialsHandler {
-    fn handle_credentials(&self, request: HandleCredentialsRequest) -> anyhow::Result<()> {
-        set_credentials(request);
+    fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+        set_credentials(credentials);
         start_shell_session()?;
         Ok(())
     }
 }
 
-fn set_credentials(request: HandleCredentialsRequest) {
-    let variables = into_variables(request);
+fn set_credentials(credentials: ProfileCredentials) {
+    let variables = into_variables(&credentials);
     for Variable { name, value } in variables {
         if let Some(value) = value {
             env::set_var(name, value);

@@ -1,0 +1,21 @@
+[package]
+name = "assume-rolers-schema"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+categories = ["command-line-utilities"]
+keywords = ["aws", "assume_role", "assume-rolers"]
+description = "Common schema for assume-rolers and its plugins."
+homepage = "https://github.com/yoshihitoh/assume-rolers"
+repository = "https://github.com/yoshihitoh/assume-rolers"
+readme = "README.md"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

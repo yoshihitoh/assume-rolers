@@ -1,8 +1,9 @@
 [package]
 name = "assume-rolers"
-version = "0.3.0"
-edition = "2021"
-authors = ["yoshihitoh <yoshihito.arih@gmail.com>"]
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
 categories = ["command-line-utilities"]
 keywords = ["aws", "assume_role"]
 description = "A command line tool to use a temporary AWS credentials."
@@ -10,24 +11,46 @@ homepage = "https://github.com/yoshihitoh/assume-rolers"
 repository = "https://github.com/yoshihitoh/assume-rolers"
 readme = "README.md"
 license = "MIT"
+default-run = "assume-rolers"
 
 [[bin]]
 name = "assume-rolers"
 path = "src/bin/main.rs"
+
+[workspace]
+members = [
+    "assume-rolers-schema",
+]
+
+exclude = [
+    "plugins/",
+]
+
+[workspace.package]
+version = "0.3.0"
+authors = ["yoshihitoh <yoshihito.arih@gmail.com>"]
+edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
 async-trait = "0.1"
 aws-config = "0.51"
 aws-types = "0.51"
-chrono = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4.0", features = ["derive", "string"] }
 clap_complete = "4.0"
 nix = "0.25"
 rusoto_config = "0.48"
 rusoto_core = "0.48"
 rusoto_sts = "0.48"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 skim = "0.10"
 tokio = { version = "1.21", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+wasmtime = "3.0"
+wasmtime-wasi = "3.0"
+wasi-common = "3.0"
+
+assume-rolers-schema = { path = "assume-rolers-schema" }

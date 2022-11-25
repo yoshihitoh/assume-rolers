@@ -7,9 +7,9 @@ use rusoto_core::Region;
 use rusoto_sts::{StsAssumeRoleSessionCredentialsProvider, StsClient};
 
 use crate::assume_role::{AssumeRole, AssumeRoleResult};
-use crate::credentials::Credentials;
 use crate::mfa::ReadMfaToken;
 use crate::profile::Profile;
+use assume_rolers_schema::credentials::Credentials;
 
 pub struct RusotoAssumeRole;
 
