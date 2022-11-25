@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2022-11-25
+
+### Bug Fixes
+
+- Specify a mfa token with `-t` or `--token` flag (regression)
+
+### Documentation
+
+- Add changlog.
+
+### Miscellaneous Tasks
+
+- Prepare release for 0.2.1
+
 ## [0.2.0] - 2022-11-22
 
 ### Bug Fixes
