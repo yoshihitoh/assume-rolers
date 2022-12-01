@@ -121,12 +121,13 @@ enum CredentialsHandler {
     WasmPlugin(WasmHandler),
 }
 
+#[async_trait]
 impl HandleCredentials for CredentialsHandler {
-    fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
         use CredentialsHandler::*;
         match self {
-            Shell(handler) => handler.handle_credentials(credentials),
-            WasmPlugin(handler) => handler.handle_credentials(credentials),
+            Shell(handler) => handler.handle_credentials(credentials).await,
+            WasmPlugin(handler) => handler.handle_credentials(credentials).await,
         }
     }
 }

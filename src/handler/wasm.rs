@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use std::env;
 use std::path::{Path, PathBuf};
 
@@ -51,8 +52,9 @@ impl WasmHandler {
     }
 }
 
+#[async_trait]
 impl HandleCredentials for WasmHandler {
-    fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
         let shell = Shell::from_process_path(&env::var("SHELL")?);
         let payload = PluginPayload::new(shell, credentials);
         let input = serde_json::to_string(&payload)?;

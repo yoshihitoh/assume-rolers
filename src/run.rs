@@ -41,11 +41,13 @@ where
                 .assume_role(profile, self.mfa_reader)
                 .await?;
 
-            self.handler.handle_credentials(ProfileCredentials {
-                profile_name: profile.name().to_string(),
-                region_name: result.region_name,
-                credentials: result.credentials,
-            })?;
+            self.handler
+                .handle_credentials(ProfileCredentials {
+                    profile_name: profile.name().to_string(),
+                    region_name: result.region_name,
+                    credentials: result.credentials,
+                })
+                .await?;
         } else {
             debug!("no profile selected.")
         }

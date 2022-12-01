@@ -1,10 +1,12 @@
 use assume_rolers_schema::credentials::ProfileCredentials;
+use async_trait::async_trait;
 
 pub mod shell;
 pub mod wasm;
 
+#[async_trait]
 pub trait HandleCredentials {
-    fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()>;
+    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()>;
 }
 
 struct Variable<'a> {

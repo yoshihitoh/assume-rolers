@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use std::env;
 use std::ffi::CString;
 
@@ -9,8 +10,9 @@ use crate::handler::{into_variables, HandleCredentials, Variable};
 
 pub struct ShellHandler;
 
+#[async_trait]
 impl HandleCredentials for ShellHandler {
-    fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
         set_credentials(credentials);
         start_shell_session()?;
         Ok(())
