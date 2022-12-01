@@ -8,10 +8,10 @@ use clap::builder::{PossibleValue, TypedValueParser};
 use clap::ArgAction;
 
 use crate::assume_role::rusoto::RusotoAssumeRole;
-use crate::handler::federation::FederationHandler;
-use crate::handler::shell::ShellHandler;
-use crate::handler::wasm::WasmHandler;
-use crate::handler::HandleCredentials;
+use crate::command::federation::FederationCommand;
+use crate::command::shell::ShellCommand;
+use crate::command::wasm::WasmCommand;
+use crate::command::Command;
 use crate::mfa::{ReadMfaToken, StaticMfaTokenReader, StdinMfaTokenReader};
 use crate::profile::load::aws_sdk::AwsSdkProfileLoader;
 use crate::profile::load::LoadProfiles;
@@ -20,22 +20,22 @@ use crate::profile::select::{SelectProfile, StaticProfileSelector};
 use crate::profile::{Profile, ProfileSet};
 use crate::run::AssumeRolers;
 
-fn builtin_handlers() -> HashMap<&'static str, CredentialsHandler> {
-    fn wasm_plugin(name: &str, binary: Vec<u8>) -> CredentialsHandler {
-        CredentialsHandler::WasmPlugin(WasmHandler::from_binary(name, binary))
+fn builtin_commands() -> HashMap<&'static str, CredentialsCommand> {
+    fn wasm_command(name: &str, binary: Vec<u8>) -> CredentialsCommand {
+        CredentialsCommand::WasmPlugin(WasmCommand::from_binary(name, binary))
     }
 
     HashMap::from([
         (
             "export",
-            wasm_plugin(
+            wasm_command(
                 "export",
                 include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/plugins/assume-rolers-export.wasm")).to_vec(),
             ),
         ),
         (
             "federation",
-            CredentialsHandler::Federation(FederationHandler),
+            CredentialsCommand::Federation(FederationCommand),
         ),
     ])
 }
@@ -137,41 +137,41 @@ fn mfa_reader_from(assume_role: &AssumeRole) -> MfaReader {
     }
 }
 
-enum CredentialsHandler {
-    Shell(ShellHandler),
-    WasmPlugin(WasmHandler),
-    Federation(FederationHandler),
+enum CredentialsCommand {
+    Shell(ShellCommand),
+    WasmPlugin(WasmCommand),
+    Federation(FederationCommand),
 }
 
 #[async_trait]
-impl HandleCredentials for CredentialsHandler {
-    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
-        use CredentialsHandler::*;
+impl Command for CredentialsCommand {
+    async fn run(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+        use CredentialsCommand::*;
         match self {
-            Shell(handler) => handler.handle_credentials(credentials).await,
-            WasmPlugin(handler) => handler.handle_credentials(credentials).await,
-            Federation(handler) => handler.handle_credentials(credentials).await,
+            Shell(command) => command.run(credentials).await,
+            WasmPlugin(command) => command.run(credentials).await,
+            Federation(command) => command.run(credentials).await,
         }
     }
 }
 
-fn credentials_handler_from(assume_role: &AssumeRole) -> anyhow::Result<CredentialsHandler> {
+fn credentials_command_from(assume_role: &AssumeRole) -> anyhow::Result<CredentialsCommand> {
     if let Some(plugin) = assume_role.plugin.as_ref() {
         let file_ext = Path::new(plugin).extension().and_then(|s| s.to_str());
-        let mut builtin_handlers = builtin_handlers();
+        let mut commands = builtin_commands();
         if let Some("wasm") = file_ext {
-            Ok(CredentialsHandler::WasmPlugin(WasmHandler::from_file(
+            Ok(CredentialsCommand::WasmPlugin(WasmCommand::from_file(
                 plugin,
             )))
-        } else if let Some(handler) = builtin_handlers.remove(plugin.as_str()) {
-            Ok(handler)
+        } else if let Some(command) = commands.remove(plugin.as_str()) {
+            Ok(command)
         } else {
             Err(anyhow::anyhow!(
                 "plugin must be a path to .wasm file, or built-in plugin name."
             ))
         }
     } else {
-        Ok(CredentialsHandler::Shell(ShellHandler))
+        Ok(CredentialsCommand::Shell(ShellCommand))
     }
 }
 
@@ -256,13 +256,13 @@ impl App {
     async fn assume_role(assume_role: AssumeRole) -> anyhow::Result<()> {
         let selector = selector_from(&assume_role);
         let mfa_reader = mfa_reader_from(&assume_role);
-        let handler = credentials_handler_from(&assume_role)?;
+        let command = credentials_command_from(&assume_role)?;
         let assume_rolers = AssumeRolers::new(
             AwsSdkProfileLoader::default(),
             selector,
             mfa_reader,
             RusotoAssumeRole,
-            handler,
+            command,
         );
         assume_rolers.run().await?;
         Ok(())

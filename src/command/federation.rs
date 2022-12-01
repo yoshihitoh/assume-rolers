@@ -3,7 +3,7 @@ use chrono::{Duration, Utc};
 use reqwest::Url;
 use serde::{Deserialize, Serialize};
 
-use crate::handler::HandleCredentials;
+use crate::command::Command;
 
 use assume_rolers_schema::credentials::{Credentials, ProfileCredentials};
 
@@ -11,11 +11,11 @@ mod endpoints {
     pub const FEDERATION: &str = "https://signin.aws.amazon.com/federation";
 }
 
-pub struct FederationHandler;
+pub struct FederationCommand;
 
 #[async_trait]
-impl HandleCredentials for FederationHandler {
-    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+impl Command for FederationCommand {
+    async fn run(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
         let expires_at = credentials
             .credentials
             .expires_at

@@ -6,13 +6,13 @@ use tracing::debug;
 
 use assume_rolers_schema::credentials::ProfileCredentials;
 
-use crate::handler::{into_variables, HandleCredentials, Variable};
+use crate::command::{into_variables, Command, Variable};
 
-pub struct ShellHandler;
+pub struct ShellCommand;
 
 #[async_trait]
-impl HandleCredentials for ShellHandler {
-    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+impl Command for ShellCommand {
+    async fn run(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
         set_credentials(credentials);
         start_shell_session()?;
         Ok(())

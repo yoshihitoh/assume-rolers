@@ -1,34 +1,34 @@
 use crate::assume_role::AssumeRole;
-use crate::handler::HandleCredentials;
+use crate::command::Command;
 use crate::mfa::ReadMfaToken;
 use crate::profile::load::LoadProfiles;
 use crate::profile::select::SelectProfile;
 use assume_rolers_schema::credentials::ProfileCredentials;
 use tracing::debug;
 
-pub struct AssumeRolers<L, S, R, A, H> {
+pub struct AssumeRolers<L, S, R, A, C> {
     loader: L,
     selector: S,
     mfa_reader: R,
     assume_role: A,
-    handler: H,
+    command: C,
 }
 
-impl<L, S, R, A, H> AssumeRolers<L, S, R, A, H>
+impl<L, S, R, A, C> AssumeRolers<L, S, R, A, C>
 where
     L: LoadProfiles + Send + Sync + 'static,
     S: SelectProfile,
     R: ReadMfaToken + Send + Sync + 'static,
     A: AssumeRole + Send + Sync + 'static,
-    H: HandleCredentials,
+    C: Command,
 {
-    pub fn new(loader: L, selector: S, mfa_reader: R, assume_role: A, handler: H) -> Self {
+    pub fn new(loader: L, selector: S, mfa_reader: R, assume_role: A, command: C) -> Self {
         Self {
             loader,
             selector,
             mfa_reader,
             assume_role,
-            handler,
+            command,
         }
     }
 
@@ -41,8 +41,8 @@ where
                 .assume_role(profile, self.mfa_reader)
                 .await?;
 
-            self.handler
-                .handle_credentials(ProfileCredentials {
+            self.command
+                .run(ProfileCredentials {
                     profile_name: profile.name().to_string(),
                     region_name: result.region_name,
                     credentials: result.credentials,

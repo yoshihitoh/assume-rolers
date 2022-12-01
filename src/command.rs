@@ -6,8 +6,8 @@ pub mod shell;
 pub mod wasm;
 
 #[async_trait]
-pub trait HandleCredentials {
-    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()>;
+pub trait Command {
+    async fn run(self, credentials: ProfileCredentials) -> anyhow::Result<()>;
 }
 
 struct Variable<'a> {

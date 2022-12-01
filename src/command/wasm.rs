@@ -11,7 +11,7 @@ use assume_rolers_schema::credentials::ProfileCredentials;
 use assume_rolers_schema::plugin::PluginPayload;
 use assume_rolers_schema::shell::Shell;
 
-use crate::handler::HandleCredentials;
+use crate::command::Command;
 
 enum WasmModule {
     File(PathBuf),
@@ -34,27 +34,27 @@ impl WasmModule {
     }
 }
 
-pub struct WasmHandler {
+pub struct WasmCommand {
     module: WasmModule,
 }
 
-impl WasmHandler {
-    pub fn from_file<P: AsRef<Path>>(wasm_path: P) -> WasmHandler {
-        WasmHandler {
+impl WasmCommand {
+    pub fn from_file<P: AsRef<Path>>(wasm_path: P) -> WasmCommand {
+        WasmCommand {
             module: WasmModule::File(wasm_path.as_ref().to_path_buf()),
         }
     }
 
-    pub fn from_binary(name: &str, binary: Vec<u8>) -> WasmHandler {
-        WasmHandler {
+    pub fn from_binary(name: &str, binary: Vec<u8>) -> WasmCommand {
+        WasmCommand {
             module: WasmModule::Binary(name.to_string(), binary),
         }
     }
 }
 
 #[async_trait]
-impl HandleCredentials for WasmHandler {
-    async fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
+impl Command for WasmCommand {
+    async fn run(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
         let shell = Shell::from_process_path(&env::var("SHELL")?);
         let payload = PluginPayload::new(shell, credentials);
         let input = serde_json::to_string(&payload)?;
