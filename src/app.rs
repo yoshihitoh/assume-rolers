@@ -8,8 +8,8 @@ use clap::builder::{PossibleValue, TypedValueParser};
 use clap::ArgAction;
 
 use crate::assume_role::rusoto::RusotoAssumeRole;
-use crate::handler::shell::ShellCredentialsHandler;
-use crate::handler::wasm::WasmCredentialsHandler;
+use crate::handler::shell::ShellHandler;
+use crate::handler::wasm::WasmHandler;
 use crate::handler::HandleCredentials;
 use crate::mfa::{ReadMfaToken, StaticMfaTokenReader, StdinMfaTokenReader};
 use crate::profile::load::aws_sdk::AwsSdkProfileLoader;
@@ -117,8 +117,8 @@ fn mfa_reader_from(assume_role: &AssumeRole) -> MfaReader {
 }
 
 enum CredentialsHandler {
-    Shell(ShellCredentialsHandler),
-    WasmPlugin(WasmCredentialsHandler),
+    Shell(ShellHandler),
+    WasmPlugin(WasmHandler),
 }
 
 impl HandleCredentials for CredentialsHandler {
@@ -141,20 +141,20 @@ fn credentials_handler_from(assume_role: &AssumeRole) -> anyhow::Result<Credenti
         .collect();
         let file_ext = Path::new(plugin).extension().and_then(|s| s.to_str());
         if let Some("wasm") = file_ext {
-            Ok(CredentialsHandler::WasmPlugin(
-                WasmCredentialsHandler::from_file(plugin),
-            ))
+            Ok(CredentialsHandler::WasmPlugin(WasmHandler::from_file(
+                plugin,
+            )))
         } else if let Some(binary) = builtin_plugins.remove(plugin.as_str()) {
-            Ok(CredentialsHandler::WasmPlugin(
-                WasmCredentialsHandler::from_binary(plugin, binary),
-            ))
+            Ok(CredentialsHandler::WasmPlugin(WasmHandler::from_binary(
+                plugin, binary,
+            )))
         } else {
             Err(anyhow::anyhow!(
                 "plugin must be a path to .wasm file, or built-in plugin name."
             ))
         }
     } else {
-        Ok(CredentialsHandler::Shell(ShellCredentialsHandler))
+        Ok(CredentialsHandler::Shell(ShellHandler))
     }
 }
 

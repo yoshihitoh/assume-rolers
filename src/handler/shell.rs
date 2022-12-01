@@ -7,9 +7,9 @@ use assume_rolers_schema::credentials::ProfileCredentials;
 
 use crate::handler::{into_variables, HandleCredentials, Variable};
 
-pub struct ShellCredentialsHandler;
+pub struct ShellHandler;
 
-impl HandleCredentials for ShellCredentialsHandler {
+impl HandleCredentials for ShellHandler {
     fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
         set_credentials(credentials);
         start_shell_session()?;

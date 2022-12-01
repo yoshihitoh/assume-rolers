@@ -33,25 +33,25 @@ impl WasmModule {
     }
 }
 
-pub struct WasmCredentialsHandler {
+pub struct WasmHandler {
     module: WasmModule,
 }
 
-impl WasmCredentialsHandler {
-    pub fn from_file<P: AsRef<Path>>(wasm_path: P) -> WasmCredentialsHandler {
-        WasmCredentialsHandler {
+impl WasmHandler {
+    pub fn from_file<P: AsRef<Path>>(wasm_path: P) -> WasmHandler {
+        WasmHandler {
             module: WasmModule::File(wasm_path.as_ref().to_path_buf()),
         }
     }
 
-    pub fn from_binary(name: &str, binary: Vec<u8>) -> WasmCredentialsHandler {
-        WasmCredentialsHandler {
+    pub fn from_binary(name: &str, binary: Vec<u8>) -> WasmHandler {
+        WasmHandler {
             module: WasmModule::Binary(name.to_string(), binary),
         }
     }
 }
 
-impl HandleCredentials for WasmCredentialsHandler {
+impl HandleCredentials for WasmHandler {
     fn handle_credentials(self, credentials: ProfileCredentials) -> anyhow::Result<()> {
         let shell = Shell::from_process_path(&env::var("SHELL")?);
         let payload = PluginPayload::new(shell, credentials);
