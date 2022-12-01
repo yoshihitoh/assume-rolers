@@ -1,6 +1,7 @@
 use assume_rolers_schema::credentials::ProfileCredentials;
 use async_trait::async_trait;
 
+pub mod federation;
 pub mod shell;
 pub mod wasm;
 

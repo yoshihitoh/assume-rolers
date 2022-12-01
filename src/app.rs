@@ -8,6 +8,7 @@ use clap::builder::{PossibleValue, TypedValueParser};
 use clap::ArgAction;
 
 use crate::assume_role::rusoto::RusotoAssumeRole;
+use crate::handler::federation::FederationHandler;
 use crate::handler::shell::ShellHandler;
 use crate::handler::wasm::WasmHandler;
 use crate::handler::HandleCredentials;
@@ -119,6 +120,7 @@ fn mfa_reader_from(assume_role: &AssumeRole) -> MfaReader {
 enum CredentialsHandler {
     Shell(ShellHandler),
     WasmPlugin(WasmHandler),
+    Federation(FederationHandler),
 }
 
 #[async_trait]
@@ -128,6 +130,7 @@ impl HandleCredentials for CredentialsHandler {
         match self {
             Shell(handler) => handler.handle_credentials(credentials).await,
             WasmPlugin(handler) => handler.handle_credentials(credentials).await,
+            Federation(handler) => handler.handle_credentials(credentials).await,
         }
     }
 }
@@ -149,6 +152,8 @@ fn credentials_handler_from(assume_role: &AssumeRole) -> anyhow::Result<Credenti
             Ok(CredentialsHandler::WasmPlugin(WasmHandler::from_binary(
                 plugin, binary,
             )))
+        } else if plugin == "federation" {
+            Ok(CredentialsHandler::Federation(FederationHandler))
         } else {
             Err(anyhow::anyhow!(
                 "plugin must be a path to .wasm file, or built-in plugin name."
