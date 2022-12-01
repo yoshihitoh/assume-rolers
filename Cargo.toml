@@ -54,4 +54,4 @@ wasi-common = "3.0"
 wasmtime = "3.0"
 wasmtime-wasi = "3.0"
 
-assume-rolers-schema = { path = "assume-rolers-schema" }
+assume-rolers-schema = { version = "0.3.0", path = "assume-rolers-schema" }
