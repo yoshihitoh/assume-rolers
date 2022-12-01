@@ -20,6 +20,26 @@ use crate::profile::select::{SelectProfile, StaticProfileSelector};
 use crate::profile::{Profile, ProfileSet};
 use crate::run::AssumeRolers;
 
+fn builtin_handlers() -> HashMap<&'static str, CredentialsHandler> {
+    fn wasm_plugin(name: &str, binary: Vec<u8>) -> CredentialsHandler {
+        CredentialsHandler::WasmPlugin(WasmHandler::from_binary(name, binary))
+    }
+
+    HashMap::from([
+        (
+            "export",
+            wasm_plugin(
+                "export",
+                include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/plugins/assume-rolers-export.wasm")).to_vec(),
+            ),
+        ),
+        (
+            "federation",
+            CredentialsHandler::Federation(FederationHandler),
+        ),
+    ])
+}
+
 async fn profile_names<L: LoadProfiles>(loader: L) -> anyhow::Result<Vec<String>> {
     let profiles = loader.load_profiles().await?;
     Ok(profiles
@@ -137,23 +157,14 @@ impl HandleCredentials for CredentialsHandler {
 
 fn credentials_handler_from(assume_role: &AssumeRole) -> anyhow::Result<CredentialsHandler> {
     if let Some(plugin) = assume_role.plugin.as_ref() {
-        let mut builtin_plugins: HashMap<&'static str, Vec<u8>> = vec![(
-            "export",
-            include_bytes!("../plugins/assume-rolers-export.wasm").to_vec(),
-        )]
-        .into_iter()
-        .collect();
         let file_ext = Path::new(plugin).extension().and_then(|s| s.to_str());
+        let mut builtin_handlers = builtin_handlers();
         if let Some("wasm") = file_ext {
             Ok(CredentialsHandler::WasmPlugin(WasmHandler::from_file(
                 plugin,
             )))
-        } else if let Some(binary) = builtin_plugins.remove(plugin.as_str()) {
-            Ok(CredentialsHandler::WasmPlugin(WasmHandler::from_binary(
-                plugin, binary,
-            )))
-        } else if plugin == "federation" {
-            Ok(CredentialsHandler::Federation(FederationHandler))
+        } else if let Some(handler) = builtin_handlers.remove(plugin.as_str()) {
+            Ok(handler)
         } else {
             Err(anyhow::anyhow!(
                 "plugin must be a path to .wasm file, or built-in plugin name."
