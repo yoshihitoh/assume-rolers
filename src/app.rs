@@ -30,7 +30,7 @@ fn builtin_commands() -> HashMap<&'static str, CredentialsCommand> {
             "export",
             wasm_command(
                 "export",
-                include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/plugins/assume-rolers-export.wasm")).to_vec(),
+                include_bytes!("../assets/assume-rolers-export.wasm").to_vec(),
             ),
         ),
         (
