@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2022-12-02
+
+### Bug Fixes
+
+- Use stderr on mfa prompt instead of stdout for better pipe handling.
+- Specify the dependency version.
+- Move .wasm plugins to assets/ directory to avoid an error on publishing
+
+### Documentation
+
+- Update CHANGELOG for 0.2.1
+- Update CHANGELOG and README for 0.3.0.
+
+### Features
+
+- Support WebAssembly/WASI plugins.
+- Add a federation plugin. (Currently, implemented as a handler, but planning to move to a plugin)
+
+### Miscellaneous Tasks
+
+- Prepare release for 0.3.0
+
+### Refactor
+
+- Simplify handler names
+- Make HandleCredentials trait async.
+- Extract builtin plugins.
+- Rename handler into command.
+
 ## [0.2.1] - 2022-11-25
 
 ### Bug Fixes

@@ -2,8 +2,7 @@
 assume-rolers is a tool to use a temporary AWS credentials.
 Currently, assume-rolers supports Linux and macOS only.
 
-## CHANGELOG
-TBA
+You can extend the tool by developing WebAssembly/WASI plugins!
 
 ## Installation
 
@@ -70,6 +69,34 @@ assume-rolers depends on rusoto's [DefaultCredentialsProvider](https://rusoto.gi
 > 4. IAM instance profile. Will only work if running on an EC2 instance with an instance profile/role.
 
 quoted from Rusoto's document.
+
+## Plugins
+### Builtin plugins
+
+You can use a builtin plugins with `-c` option.
+
+| name                   | note
+|:-----------------------|:---------------------------------------------------------------
+| export                 | show commands to export environment variable.
+| federation             | show a federation url to sign-in to the AWS Management Console.
+
+For example, you can use `export` plugin with the following command.
+
+```bash
+$ assume-rolers <PROFILE> -t <TOKEN> -p export
+```
+
+### Write your own plugin
+
+You can write your own plugin. The plugin must be built for wasm32-wasi target.
+See [assume-rolers-export](plugins/assume-rolers-export/) plugin as an example.
+
+You can use the wasm/wasi plugin by specifying the path to the `.wasm` file.
+For example, you can use `assume-rolers-export.wasm` plugin with the following command.
+
+```bash
+$ assume-rolers <PROFILE> -t <TOKEN> -p ./plugins/assume-rolers-export.wasm
+```
 
 ## Shell completion
 Currently, assume-rolers supports fish shell only.

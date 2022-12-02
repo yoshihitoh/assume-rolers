@@ -9,7 +9,6 @@ keywords = ["aws", "assume_role", "assume-rolers"]
 description = "Common schema for assume-rolers and its plugins."
 homepage = "https://github.com/yoshihitoh/assume-rolers"
 repository = "https://github.com/yoshihitoh/assume-rolers"
-readme = "README.md"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
