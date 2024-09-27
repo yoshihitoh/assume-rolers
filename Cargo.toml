@@ -55,3 +55,4 @@ wasmtime = "3.0"
 wasmtime-wasi = "3.0"
 
 assume-rolers-schema = { version = "0.3.0", path = "assume-rolers-schema" }
+aws-runtime = "1.4.3"

@@ -3,7 +3,8 @@ use std::convert::TryFrom;
 
 use async_trait::async_trait;
 use aws_config::profile::load;
-use aws_config::profile::profile_file::ProfileFiles;
+use aws_runtime::env_config::file::EnvConfigFiles;
+use aws_runtime::env_config::section::EnvConfigSections;
 use aws_types::os_shim_internal::{Env, Fs};
 
 use crate::profile::load::LoadProfiles;
@@ -36,10 +37,10 @@ fn profile_from(name: &str, value: &aws_config::profile::Profile) -> anyhow::Res
     })
 }
 
-impl TryFrom<aws_config::profile::ProfileSet> for ProfileSet {
+impl TryFrom<EnvConfigSections> for ProfileSet {
     type Error = anyhow::Error;
 
-    fn try_from(value: aws_config::profile::ProfileSet) -> Result<Self, Self::Error> {
+    fn try_from(value: EnvConfigSections) -> Result<Self, Self::Error> {
         let profiles = value
             .profiles()
             .map(|n| profile_from(n, value.get_profile(n).unwrap()).map(|p| (n.to_string(), p)))
@@ -50,7 +51,7 @@ impl TryFrom<aws_config::profile::ProfileSet> for ProfileSet {
 
 #[derive(Debug, Default)]
 pub struct AwsSdkProfileLoader {
-    profile_files: ProfileFiles,
+    profile_files: EnvConfigFiles,
     fs: Fs,
     env: Env,
 }

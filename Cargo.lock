@@ -81,6 +81,7 @@ dependencies = [
  "assume-rolers-schema",
  "async-trait",
  "aws-config",
+ "aws-runtime",
  "aws-types",
  "chrono",
  "clap 4.0.26",
