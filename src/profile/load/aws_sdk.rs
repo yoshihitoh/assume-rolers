@@ -58,7 +58,7 @@ pub struct AwsSdkProfileLoader {
 #[async_trait]
 impl LoadProfiles for AwsSdkProfileLoader {
     async fn load_profiles(&self) -> anyhow::Result<ProfileSet> {
-        let profiles = load(&self.fs, &self.env, &self.profile_files).await?;
+        let profiles = load(&self.fs, &self.env, &self.profile_files, None).await?;
         Ok(ProfileSet::try_from(profiles)?)
     }
 }
