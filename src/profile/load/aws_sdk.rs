@@ -11,29 +11,24 @@ use crate::profile::load::LoadProfiles;
 use crate::profile::{Profile, ProfileSet};
 
 fn profile_from(name: &str, value: &aws_config::profile::Profile) -> anyhow::Result<Profile> {
-    fn s<S: Into<String>>(s: Option<S>) -> Option<String> {
+    fn maybe_s<S: Into<String>>(s: Option<S>) -> Option<String> {
         s.map(|x| x.into())
     }
 
-    fn n(s: Option<&str>) -> anyhow::Result<Option<u32>> {
-        if let Some(s) = s {
-            let n = s.parse()?;
-            Ok(Some(n))
-        } else {
-            Ok(None)
-        }
+    fn try_n(s: Option<&str>) -> anyhow::Result<Option<u32>> {
+        Ok(s.map(|s| s.parse().map(Some)).unwrap_or(Ok(None))?)
     }
 
     Ok(Profile {
         name: name.to_string(),
-        source_profile_name: s(value.get("source_profile")),
-        region_name: s(value.get("region")),
-        role_arn: s(value.get("role_arn")),
-        role_session_name: s(value.get("role_session_name")),
-        external_id: s(value.get("external_id")),
-        duration_seconds: n(value.get("duration_seconds"))?,
-        scope_down_policy: s(value.get("scope_down_policy")),
-        mfa_serial: s(value.get("mfa_serial")),
+        source_profile_name: maybe_s(value.get("source_profile")),
+        region_name: maybe_s(value.get("region")),
+        role_arn: maybe_s(value.get("role_arn")),
+        role_session_name: maybe_s(value.get("role_session_name")),
+        external_id: maybe_s(value.get("external_id")),
+        duration_seconds: try_n(value.get("duration_seconds"))?,
+        scope_down_policy: maybe_s(value.get("scope_down_policy")),
+        mfa_serial: maybe_s(value.get("mfa_serial")),
     })
 }
 
