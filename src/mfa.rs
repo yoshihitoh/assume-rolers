@@ -4,10 +4,11 @@ use std::io::Write;
 use async_trait::async_trait;
 
 #[async_trait]
-pub trait ReadMfaToken {
+pub trait ReadMfaToken: Clone {
     async fn read_mfa_token(&self, mfa_serial: &str) -> anyhow::Result<String>;
 }
 
+#[derive(Clone)]
 pub struct StdinMfaTokenReader;
 
 #[async_trait]
@@ -22,6 +23,7 @@ impl ReadMfaToken for StdinMfaTokenReader {
     }
 }
 
+#[derive(Clone)]
 pub struct StaticMfaTokenReader {
     token: String,
 }

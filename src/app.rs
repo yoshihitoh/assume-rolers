@@ -2,12 +2,7 @@ use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::Path;
 
-use assume_rolers_schema::credentials::ProfileCredentials;
-use async_trait::async_trait;
-use clap::builder::{PossibleValue, TypedValueParser};
-use clap::ArgAction;
-
-use crate::assume_role::rusoto::RusotoAssumeRole;
+use crate::assume_role::aws_sdk::AwsSdkAssumeRole;
 use crate::command::federation::FederationCommand;
 use crate::command::shell::ShellCommand;
 use crate::command::wasm::WasmCommand;
@@ -19,6 +14,10 @@ use crate::profile::select::skim::SkimProfileSelector;
 use crate::profile::select::{SelectProfile, StaticProfileSelector};
 use crate::profile::{Profile, ProfileSet};
 use crate::run::AssumeRolers;
+use assume_rolers_schema::credentials::ProfileCredentials;
+use async_trait::async_trait;
+use clap::builder::{PossibleValue, TypedValueParser};
+use clap::ArgAction;
 
 fn builtin_commands() -> HashMap<&'static str, CredentialsCommand> {
     fn wasm_command(name: &str, binary: Vec<u8>) -> CredentialsCommand {
@@ -113,6 +112,7 @@ fn selector_from(assume_role: &AssumeRole) -> ProfileSelector {
     }
 }
 
+#[derive(Clone)]
 enum MfaReader {
     Stdin(StdinMfaTokenReader),
     Static(StaticMfaTokenReader),
@@ -261,7 +261,7 @@ impl App {
             AwsSdkProfileLoader::default(),
             selector,
             mfa_reader,
-            RusotoAssumeRole,
+            AwsSdkAssumeRole,
             command,
         );
         assume_rolers.run().await?;

@@ -4,7 +4,11 @@ use crate::mfa::ReadMfaToken;
 use crate::profile::Profile;
 use assume_rolers_schema::credentials::Credentials;
 
-pub mod rusoto;
+pub mod aws_sdk;
+
+pub mod defaults {
+    pub const DURATION_SECONDS: i32 = 3600;
+}
 
 pub struct AssumeRoleResult {
     pub credentials: Credentials,
